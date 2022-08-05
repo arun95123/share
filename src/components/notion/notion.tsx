@@ -1,4 +1,6 @@
 import React, {useState} from 'react';
+import ShareWidget from '../shareWidget';
+
 import shareImage from '../../images/share.svg';
 import './notion.css';
 import { inputData } from '../../types';
@@ -11,6 +13,7 @@ const Notion:React.FC<{data: inputData}> = ({data}) => {
                 <span className="share-button__text">Share</span>
                 <img className="share-button__image" alt="share" src={shareImage} />
             </button>
+            {showShareWidget ? <ShareWidget data={data}/> : <></>}
         </div>
     );
 };

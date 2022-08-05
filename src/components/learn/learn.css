@@ -1,0 +1,31 @@
+.share-widget__learn {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: #F9FAFB;
+    border-radius: 0 0 8px 8px;
+}
+
+.share-widget__learn__image {
+    margin-right: 10px;
+}
+
+.share-widget__learn__text {
+    color: #6B7280;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.share-widget__learn__copy {
+    color: #111827;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.share-widget__container {
+    display:flex;
+    align-items: center;
+}
