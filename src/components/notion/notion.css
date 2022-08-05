@@ -1,0 +1,18 @@
+.share-button {
+    display: flex;
+    align-items: center;
+    color: white;
+    background: black;
+    padding: 8px 16px;
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+.share-button__text {
+    margin-right: 6px;        
+}
+
+.share-button__image {
+    height: 12.8px;
+    width: 12.8px;
+}
