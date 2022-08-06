@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import TargetItem from './targetItem';
+import SelectModal from '../../selectModal';
 import { item, inputData } from '../../../types';
 import './add-target.css';
 
@@ -48,7 +49,7 @@ const AddTarget:React.FC<Props> = ({data}) => {
         addInvited(categoryList, invitedList);
         return invitedList;
     }
-    
+
     return(
         <div className="share-widget__add">
             <div className='share-widget__add-input' onClick={() => setShowModal(true)}>
@@ -58,6 +59,16 @@ const AddTarget:React.FC<Props> = ({data}) => {
                 <button>Invite</button>
             </div>
             {showInvitedPeople()}
+            {
+                showModal ? 
+                    <SelectModal 
+                        closeModal={() => setShowModal(false)}
+                        peopleList={peopleList}
+                        categoryList={categoryList}
+                    /> 
+                : 
+                    <></>
+            }
         </div>
     );
 };

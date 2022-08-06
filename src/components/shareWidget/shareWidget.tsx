@@ -8,7 +8,6 @@ import './share-widget.css';
 import { inputData } from '../../types';
 
 const ShareWidget:React.FC<{data: inputData}> = ({data}) => {
-    console.log('SHARE WIDGET');
     return(
         <div className="share-widget">
             <div className="share-widget__web">
