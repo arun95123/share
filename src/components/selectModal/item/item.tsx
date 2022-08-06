@@ -1,12 +1,14 @@
 import React, {useRef} from 'react';
-import {item} from '../../../types';
 import './item.css';
 
-interface Props extends item {
-    onClickHandler: React.MouseEventHandler<HTMLUListElement>;
+interface Props {
+    name: string;
+    displayIcon: string;
+    id: string;
+    onClickHandler: Function;
 }
 
-const Item:React.FC<Props> = ({name, displayIcon, onClickHandler}) => {
+const Item:React.FC<Props> = ({name, displayIcon, onClickHandler, id}) => {
     const ref = useRef(null);
 
     const onKeyDownListener = (e: React.KeyboardEvent<HTMLUListElement>) => {
@@ -20,7 +22,7 @@ const Item:React.FC<Props> = ({name, displayIcon, onClickHandler}) => {
             ref={ref}
             className='item'
             tabIndex={0}
-            onClick={onClickHandler}
+            onClick={() => onClickHandler(id)}
             onKeyDown={onKeyDownListener}
         >
             {displayIcon ? 

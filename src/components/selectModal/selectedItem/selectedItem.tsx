@@ -4,14 +4,15 @@ import './selected-item.css';
 
 interface Props {
     name: string;
+    id: string;
     removeSelected: Function;
 }
 
-const SelectedItem:React.FC<Props> = ({name, removeSelected}) => {
+const SelectedItem:React.FC<Props> = ({name, id, removeSelected}) => {
     return(
         <div className='selected-item'>
             <div>{name}</div>
-            <img src={close} alt='close' onClick={() => removeSelected(name)}/>
+            <img src={close} alt='close' onClick={() => removeSelected(id)}/>
         </div>
     );
 }

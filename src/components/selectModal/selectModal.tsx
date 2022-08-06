@@ -3,7 +3,7 @@ import DropDown from '../dropDown';
 import Learn from '../learn';
 import SelectedItem from './selectedItem';
 import Item from './item';
-import { debounce } from '../../utils';
+import { debounce, removeFromArray } from '../../utils';
 import './category.css';
 import './select-modal.css';
 import { accessModifier, item } from '../../types';
@@ -29,7 +29,7 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
 
     useEffect(() => {
         document.getElementById('select-modal-input')?.focus();
-    },[])
+    },[]);
 
     const overlayClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
         if((e.target as HTMLDivElement).id === "overlay"){
@@ -37,20 +37,17 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
         }
     };
 
-    const peopleItemOnClick = (e: React.MouseEvent<HTMLUListElement>) => {
-        // setSelectedValues();
+    const itemOnClick = (id: string) => {
+        setSelectedValue(new Set(selectedValue.add(id)));
+        if(id.slice(0,1) === 'p'){
+            removeFromArray(suggestedPeople, id);
+            setSuggestedPeople([...suggestedPeople]);
+        }else {
+            removeFromArray(suggestedCategories, id);
+            setSuggestedCategories([...suggestedCategories]);
+        }
         document.getElementById('select-modal-input')?.focus();
     }
-
-    const categoryItemOnClick = (e: React.MouseEvent<HTMLUListElement>) => {
-        // setSelectedValues();
-        document.getElementById('select-modal-input')?.focus();
-    }
-
-    // const removeSelected = (name: string) => {
-    //     // delete selectedValues[name];
-    //     // setSelectedValues();
-    // }
 
     const getMatchingNames = (list: Map<string, item>, regex: RegExp) => {
         let suggestedName: string[] = [];
@@ -92,32 +89,43 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
         }
     }
 
-    // const addSelected = (list: Map<string, item>, result: SelectedItem[]) => {
-    //     selectedValues.forEach((item) => result.push(
-    //             <SelectedItem
-    //                 key={list.get(item)?.id}
-    //                 name={list.get(item)?.name}
-    //                 removeSelected={removeSelected}
-    //             />
-    //         )
-    //     );
-    // }
+    const removeSelected = (id: string) => {
+        selectedValue.delete(id);
+        if(id.slice(0,1) === 'p'){
+            suggestedPeople.push(id);
+            setSuggestedPeople([...suggestedPeople]);
+        }else {
+            suggestedCategories.push(id);
+            setSuggestedCategories([...suggestedCategories]);
+        }
+        setSelectedValue(new Set(selectedValue));
+    }
 
-    // const showSelectedPills = () => {
-    //     let selectedPills: SelectedItem[] = [];
-    //     addSelected(peopleList, selectedPills);
-    //     addSelected(categoryList, selectedPills);
-    //     return selectedPills;
-    // }
+    const showSelectedPills = () => {
+        let selectedPills: SelectedItem[] = [];
+        selectedValue.forEach((id) => {
+            let list = id.slice(0,1) === 'p' ? peopleList : categoryList;
+            selectedPills.push(
+                <SelectedItem
+                    key={id}
+                    id={id}
+                    name={list.get(id)?.name}
+                    removeSelected={removeSelected}
+                />
+            )}
+        );
+        return selectedPills;
+    }
 
-    const showSuggestions = (list: Map<string, item>, selected: string[], clickHandler: Function) => {
+    const showSuggestions = (list: Map<string, item>, selected: string[]) => {
         let result: Item[] = [];
         result = selected.map(value =>
             <Item
                 key={list.get(value)?.id}
+                id={list.get(value)?.id}
                 name={list.get(value)?.name}
                 displayIcon={list.get(value)?.displayIcon}
-                onClickHandler={clickHandler}
+                onClickHandler={itemOnClick}
             />
         );
         return result;
@@ -128,11 +136,11 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
             <div className="select-modal">
                 <div className="select-modal__header">
                     <div className="select-modal__header__input">
-                        {/* {showSelectedPills()} */}
+                        {showSelectedPills()}
                         <input
                             id='select-modal-input'
                             className="select-modal__header__text" 
-                            // placeholder={Object.keys(selectedValues).length > 0 ? '' : 'Search emails, names or groups'}
+                            placeholder={selectedValue.size > 0 ? '' : 'Search emails, names or groups'}
                             onChange={(e) => debounce(onInputChange, 500)(e)}
                             onKeyDown={inputKeyDown}
                         />
@@ -148,7 +156,7 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
                     {suggestedPeople.length > 0 ?
                         <div className='category'>
                             <h4>Select a person</h4>
-                            {showSuggestions(peopleList, suggestedPeople, peopleItemOnClick)}
+                            {showSuggestions(peopleList, suggestedPeople)}
                         </div>
                     :
                         <></>
@@ -156,7 +164,7 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
                     {suggestedCategories.length > 0 ?
                         <div className='category'>
                             <h4>Select a group</h4>
-                            {showSuggestions(categoryList, suggestedCategories, categoryItemOnClick)}
+                            {showSuggestions(categoryList, suggestedCategories)}
                         </div>
                     :
                         <></>
