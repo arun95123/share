@@ -6,14 +6,15 @@ import './learn.css';
 
 interface Props {
     showCopy?: boolean;
+    onKeyDownHander?: React.KeyboardEventHandler<HTMLAnchorElement>;
 }
 
-const Learn:React.FC<Props> = ({showCopy}) => {
+const Learn:React.FC<Props> = ({showCopy, onKeyDownHander}) => {
     return(
         <div className="share-widget__learn">
             <div className="share-widget__container">
                 <img src={Question} alt="decorative" className="share-widget__learn__image"/>
-                <a href='/#' className="share-widget__learn__text">learn about sharing</a>
+                <a href='/#' onKeyDown={onKeyDownHander} className="share-widget__learn__text">learn about sharing</a>
             </div>
             {showCopy ? 
                 <div className="share-widget__container">

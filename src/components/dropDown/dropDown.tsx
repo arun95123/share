@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import Arrow from '../../images/dropdown.svg';
 import './drop-down.css';
 

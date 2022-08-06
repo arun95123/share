@@ -9,9 +9,12 @@ interface Props {
 }
 
 const AddTarget:React.FC<Props> = ({data}) => {
-    const [peopleList, modifyPeopleList] = useState(new Map(data.people.map(person => [person.id, person])) as Map<string, item>);
-    const [categoryList, modifyCategoryList] = useState(new Map(data.category.map(cat => [cat.id, cat])) as Map<string, item>);
+    const [peopleList, modifyPeopleList] = useState<Map<string, item>>(new Map(data.people.map(person => [person.id, person])));
+    const [categoryList, modifyCategoryList] = useState<Map<string, item>>(new Map(data.category.map(cat => [cat.id, cat])));
     const [showModal, setShowModal] = useState(false);
+    let notInvitedPeople = new Map();
+    let notInvitedCategory = new Map();
+
 
     useEffect(() => {
         const closeModalOnEsc = (e: any) => {
@@ -27,7 +30,7 @@ const AddTarget:React.FC<Props> = ({data}) => {
 
     },[showModal]);
 
-    const addInvited = (list: Map<string, item>, result: TargetItem[]) => {
+    const addInvited = (list: Map<string, item>, result: TargetItem[], notAdded: Map<string, item>) => {
         list.forEach((item) => {
             if(item.added){
                 result.push(
@@ -39,14 +42,16 @@ const AddTarget:React.FC<Props> = ({data}) => {
                         access={item.access}
                     />
                 );
+            }else {
+                notAdded.set(item.id, item);
             }
         });
     }
 
     const showInvitedPeople = () => {
         let invitedList: TargetItem[] = [];
-        addInvited(peopleList, invitedList);
-        addInvited(categoryList, invitedList);
+        addInvited(peopleList, invitedList, notInvitedPeople);
+        addInvited(categoryList, invitedList, notInvitedCategory);
         return invitedList;
     }
 
@@ -63,8 +68,10 @@ const AddTarget:React.FC<Props> = ({data}) => {
                 showModal ? 
                     <SelectModal 
                         closeModal={() => setShowModal(false)}
-                        peopleList={peopleList}
-                        categoryList={categoryList}
+                        peopleList={notInvitedPeople}
+                        categoryList={notInvitedCategory}
+                        modifyPeopleList={modifyPeopleList}
+                        modifyCategoryList={modifyCategoryList}
                     /> 
                 : 
                     <></>

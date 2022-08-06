@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, SetStateAction} from 'react';
 import DropDown from '../dropDown';
 import Learn from '../learn';
 import SelectedItem from './selectedItem';
@@ -12,23 +12,33 @@ interface Props {
     closeModal: Function;
     peopleList: Map<string, item>;
     categoryList: Map<string, item>;
+    modifyPeopleList: React.Dispatch<React.SetStateAction<Map<string, item>>>;
+    modifyCategoryList: React.Dispatch<React.SetStateAction<Map<string, item>>>;
 }
 
 
-const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => {
+const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList, modifyPeopleList, modifyCategoryList}) => {
     let access = accessModifier.FULL_ACCESS;
+    let inputRef: React.RefObject<HTMLInputElement>= useRef(null);
 
-    // const [suggestedPeople, setSuggestedPeople] = useState(new Map(Array.from(peopleList).slice(0,2)));
-    // const [suggestedCategories, setSuggestedCategories] = useState(new Map(Array.from(categoryList).slice(0,2)));
     const [suggestedPeople, setSuggestedPeople] = useState([] as string[]);
     const [suggestedCategories, setSuggestedCategories] = useState([] as string[]);
     const [selectedValue, setSelectedValue] = useState(new Set() as Set<string>);
 
     const addFirstAvailable = () => {
+        setSuggestedPeople(Array.from(peopleList)
+            .filter(([key, val]) => !selectedValue.has(key))
+            .slice(0,2)
+            .map(([key, val]) => key));
+        setSuggestedCategories(Array.from(categoryList)
+            .filter(([key, val]) => !selectedValue.has(key))
+            .slice(0,2)
+            .map(([key, val]) => key));
     }
 
     useEffect(() => {
-        document.getElementById('select-modal-input')?.focus();
+        addFirstAvailable();
+        inputRef.current?.focus();
     },[]);
 
     const overlayClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -46,7 +56,11 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
             removeFromArray(suggestedCategories, id);
             setSuggestedCategories([...suggestedCategories]);
         }
-        document.getElementById('select-modal-input')?.focus();
+        if(inputRef.current){
+            inputRef.current.focus();
+            inputRef.current.value = '';
+            addFirstAvailable();
+        }
     }
 
     const getMatchingNames = (list: Map<string, item>, regex: RegExp) => {
@@ -61,7 +75,7 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if(e.target.value === ''){
-
+            addFirstAvailable();
         }else {
             const regex = new RegExp(`^${e.target.value}`, 'i');
             setSuggestedPeople(getMatchingNames(peopleList, regex));
@@ -72,6 +86,33 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
     const accessChangeHandler = (val: string) => access = val as accessModifier;
 
     const onInviteClick = () => {
+        modifyPeopleList((prevState: Map<string,item>) => {
+            selectedValue.forEach(value => {
+                if(prevState.get(value)){
+                    let state = {
+                        ...(prevState.get(value) as item),
+                        added: true
+                     }
+                    prevState.set(value, state)
+                }
+
+            });
+            return new Map(prevState);
+        });
+        modifyCategoryList((prevState: Map<string,item>) => {
+            selectedValue.forEach(value => {
+                if(prevState.get(value)){
+                    let state = {
+                        ...(prevState.get(value) as item),
+                        access: access,
+                        added: true
+                     }
+                    prevState.set(value, state)
+                }
+
+            });
+            return new Map(prevState);
+        });
         closeModal();
     }
     
@@ -85,19 +126,12 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
 
     const learnKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
         if(e.key === 'Tab'){
-            document.getElementById('select-modal-input')?.focus();
+            inputRef.current?.focus();
         }
     }
 
     const removeSelected = (id: string) => {
         selectedValue.delete(id);
-        if(id.slice(0,1) === 'p'){
-            suggestedPeople.push(id);
-            setSuggestedPeople([...suggestedPeople]);
-        }else {
-            suggestedCategories.push(id);
-            setSuggestedCategories([...suggestedCategories]);
-        }
         setSelectedValue(new Set(selectedValue));
     }
 
@@ -138,6 +172,7 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList}) => 
                     <div className="select-modal__header__input">
                         {showSelectedPills()}
                         <input
+                            ref={inputRef}
                             id='select-modal-input'
                             className="select-modal__header__text" 
                             placeholder={selectedValue.size > 0 ? '' : 'Search emails, names or groups'}
