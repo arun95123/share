@@ -47,21 +47,21 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList, modi
         }
     };
 
-    const itemOnClick = (id: string) => {
-        setSelectedValue(new Set(selectedValue.add(id)));
-        if(id.slice(0,1) === 'p'){
-            removeFromArray(suggestedPeople, id);
-            setSuggestedPeople([...suggestedPeople]);
-        }else {
-            removeFromArray(suggestedCategories, id);
-            setSuggestedCategories([...suggestedCategories]);
-        }
-        if(inputRef.current){
-            inputRef.current.focus();
-            inputRef.current.value = '';
-            addFirstAvailable();
+    const inputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if(e.key === 'Tab'){
+            if(e.shiftKey){
+                (document.getElementsByClassName('share-widget__learn__text')[0] as HTMLElement).focus()
+            }
         }
     }
+
+    const learnKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
+        if(e.key === 'Tab'){
+            inputRef.current?.focus();
+        }
+    }
+
+    const accessChangeHandler = (val: string) => access = val as accessModifier;
 
     const getMatchingNames = (list: Map<string, item>, regex: RegExp) => {
         let suggestedName: string[] = [];
@@ -83,56 +83,44 @@ const SelectModal:React.FC<Props> = ({closeModal, peopleList, categoryList, modi
         }
     };
 
-    const accessChangeHandler = (val: string) => access = val as accessModifier;
-
-    const onInviteClick = () => {
-        modifyPeopleList((prevState: Map<string,item>) => {
-            selectedValue.forEach(value => {
-                if(prevState.get(value)){
-                    let state = {
-                        ...(prevState.get(value) as item),
-                        added: true
-                     }
-                    prevState.set(value, state)
-                }
-
-            });
-            return new Map(prevState);
-        });
-        modifyCategoryList((prevState: Map<string,item>) => {
-            selectedValue.forEach(value => {
-                if(prevState.get(value)){
-                    let state = {
-                        ...(prevState.get(value) as item),
-                        access: access,
-                        added: true
-                     }
-                    prevState.set(value, state)
-                }
-
-            });
-            return new Map(prevState);
-        });
-        closeModal();
-    }
-    
-    const inputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if(e.key === 'Tab'){
-            if(e.shiftKey){
-                (document.getElementsByClassName('share-widget__learn__text')[0] as HTMLElement).focus()
-            }
+    const itemOnClick = (id: string) => {
+        setSelectedValue(new Set(selectedValue.add(id)));
+        if(id.slice(0,1) === 'p'){
+            removeFromArray(suggestedPeople, id);
+            setSuggestedPeople([...suggestedPeople]);
+        }else {
+            removeFromArray(suggestedCategories, id);
+            setSuggestedCategories([...suggestedCategories]);
         }
-    }
-
-    const learnKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
-        if(e.key === 'Tab'){
-            inputRef.current?.focus();
+        if(inputRef.current){
+            inputRef.current.focus();
+            inputRef.current.value = '';
+            addFirstAvailable();
         }
     }
 
     const removeSelected = (id: string) => {
         selectedValue.delete(id);
         setSelectedValue(new Set(selectedValue));
+    }
+
+    const onInviteClick = () => {
+        const invite = (prevState: Map<string,item>) => {
+            selectedValue.forEach(value => {
+                if(prevState.get(value)){
+                    let state = {
+                        ...(prevState.get(value) as item),
+                        added: true
+                     }
+                    prevState.set(value, state)
+                }
+
+            });
+            return new Map(prevState);
+        }
+        modifyPeopleList(invite);
+        modifyCategoryList(invite);
+        closeModal();
     }
 
     const showSelectedPills = () => {
